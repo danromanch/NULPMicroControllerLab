@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spotify Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: #282828;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #1DB954;
+        }
+        button {
+            background-color: #1DB954;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #1ed760;
+        }
+        .track-list {
+            margin-top: 20px;
+        }
+        .track-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #404040;
+        }
+        .track-name {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .track-artists, .track-album {
+            font-size: 0.95em;
+            color: #b3b3b3;
+        }
+        .now-playing-img {
+            width: 64px;
+            height: 64px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .now-playing-content {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Your Spotify Dashboard</h1>
+
+    <div class="card">
+        <h2>Top Tracks</h2>
+        <button onclick="loadTopTracks()">Load Top Tracks</button>
+        <div id="tracks-list" class="track-list"></div>
+    </div>
+
+    <div class="card">
+        <h2>Now Playing</h2>
+        <div id="current-track"></div>
+    </div>
+</div>
+
+<script>
+    var accessToken = window.accessToken || ""; // This should be set by the backend
+
+    if (!accessToken) {
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('profile-info').innerHTML = "Access token not set. Please log in.";
+            document.getElementById('tracks-list').innerHTML = "";
+            document.getElementById('current-track').innerHTML = "";
+        });
+    }    function loadTopTracks() {
+        fetch('https://eggplant-bristle-calendula.glitch.me/top5', {
+            headers: {
+                'Authorization': 'Bearer ' + accessToken
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const tracksList = document.getElementById('tracks-list');
+                tracksList.innerHTML = data.map(track => `
+                        <div class="track-item">
+                            <div class="track-name">${track.rank}. ${track.name}</div>
+                            <div class="track-artists">By ${track.artists}</div>
+                            <div class="track-album">Album: ${track.album}</div>
+                        </div>
+                    `).join('');
+            })
+            .catch(() => {
+                document.getElementById('tracks-list').innerHTML = 'Error loading tracks.';
+            });
+    }
+
+    function checkNowPlaying() {
+        fetch('https://eggplant-bristle-calendula.glitch.me/currently-playing', )
+            .then(response => response.json())
+            .then(data => {
+                const track = data;
+                if (track.message) {
+                    document.getElementById('current-track').innerHTML = track.message;
+                } else {
+                    document.getElementById('current-track').innerHTML = `
+                            <div class="now-playing-content">
+                                <img src="${track.image}" alt="Album Art" class="now-playing-img" />
+                                <div>
+                                    <div class="track-name">${track.name}</div>
+                                    <div class="track-artists">By ${track.artists}</div>
+                                    <div class="track-album">Album: ${track.album}</div>
+                                </div>
+                            </div>
+                        `;
+                }
+            })
+            .catch(() => {
+                document.getElementById('current-track').innerHTML = 'Error loading now playing track.';
+            });
+    }
+    setInterval(checkNowPlaying, 1000);
+
+</script>
+</body>
+</html>

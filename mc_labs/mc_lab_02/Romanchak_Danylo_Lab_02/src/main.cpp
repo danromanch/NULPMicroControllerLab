@@ -2,8 +2,8 @@
 #include <ESP8266WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
-#define SSID "Net"
-#define PASSWORD "11111112"
+#define SSID "ESP8266_Server"
+#define PASSWORD "12345678"
 #define ST1 100
 #define ST2 1000
 #define HOLD_TIME 500
@@ -109,7 +109,7 @@ void wifiSetup() {
 }
 
 void setup() {
-    Serial.begin(57600, SERIAL_7E2);
+    Serial.begin(115200, SERIAL_8N1);
     pinSetup();
     ledSetup();
     wifiSetup();
@@ -131,6 +131,7 @@ void send() {
 void receive() {
     if (Serial.available()) {
         uint8_t reader = Serial.read();
+        Serial.println(reader);
         if (reader == 'k') {
             STEP_INCREMENT(stepTime);
         }
